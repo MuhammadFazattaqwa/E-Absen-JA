@@ -8,7 +8,7 @@ import { getDayNameFromDate, getSchedule, DayName, Session } from '@/lib/constan
 import { formatDateForInput } from '@/lib/utils/date';
 import { AttendanceStatus } from '@/lib/types/database';
 import toast from 'react-hot-toast';
-import Image from 'next/image';
+import NextImage from 'next/image';
 
 export default function AbsenPage() {
   const router = useRouter();
@@ -345,7 +345,7 @@ export default function AbsenPage() {
             {photoPreview && (
               <div className="mt-4">
                 <p className="text-sm text-army-600 mb-2">Preview:</p>
-                <Image
+                <NextImage
                   src={photoPreview}
                   alt="Preview"
                   width={300}
