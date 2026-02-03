@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-krem-50 text-army-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-army-600 hover:bg-army-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply bg-hijau-600 hover:bg-hijau-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-army-600 text-army-600 hover:bg-army-50 font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2 border border-army-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-army-500 focus:border-transparent bg-white;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-md p-6 border border-army-100;
+  }
+  
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  }
+  
+  .badge-hadir {
+    @apply bg-hijau-100 text-hijau-800;
+  }
+  
+  .badge-izin {
+    @apply bg-blue-100 text-blue-800;
+  }
+  
+  .badge-sakit {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+  
+  .badge-alpa {
+    @apply bg-red-100 text-red-800;
+  }
+}
