@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import Navbar from '@/components/ui/Navbar';
 import { getDayNameFromDate, getTodaySchedules } from '@/lib/constants/schedules';
-import { formatDate, getCurrentMonth, getMonthRange } from '@/lib/utils/date';
+import { formatDate, getCurrentMonth, getMonthRange, getNowInTimeZone } from '@/lib/utils/date';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
@@ -13,7 +13,7 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const today = new Date();
+  const today = getNowInTimeZone();
   const dayName = getDayNameFromDate(today);
   const schedules = getTodaySchedules(dayName);
   const { year, month } = getCurrentMonth();
