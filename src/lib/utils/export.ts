@@ -2,13 +2,12 @@ import { Attendance } from '@/lib/types/database';
 import { formatDate } from './date';
 
 export function exportToCSV(attendances: Attendance[], filename: string = 'riwayat-absensi.csv') {
-  const headers = ['No', 'Tanggal', 'Sesi', 'Hari', 'Kajian', 'Pengajar', 'PJ', 'Status', 'Catatan', 'Foto'];
+  const headers = ['Tanggal', 'Sesi', 'Hari', 'Kajian', 'Pengajar', 'PJ', 'Status', 'Catatan', 'URL Foto'];
 
   const normalizeText = (value: string) =>
     value.replace(/\s+/g, ' ').trim();
 
-  const rows = attendances.map((a, index) => [
-    index + 1,
+  const rows = attendances.map((a) => [
     formatDate(a.date, 'dd/MM/yyyy'),
     a.session === 'morning' ? 'Pagi' : 'Malam',
     a.day_name,
@@ -17,7 +16,7 @@ export function exportToCSV(attendances: Attendance[], filename: string = 'riway
     a.pj,
     a.status,
     a.note ? normalizeText(a.note) : '-',
-    a.photo_url ? 'Ada' : 'Tidak',
+    a.photo_url ? `=HYPERLINK("${a.photo_url}","Lihat")` : '-',
   ]);
 
   const escapeCell = (value: string | number) =>
