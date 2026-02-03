@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Navbar from '@/components/ui/Navbar';
 import Loading from '@/components/ui/Loading';
 import EmptyState from '@/components/ui/EmptyState';
-import { Attendance } from '@/lib/types/database';
 import { getCurrentMonth, getMonthRange, getMonthName } from '@/lib/utils/date';
 
 interface MonthStats {
@@ -23,26 +22,14 @@ interface MonthStats {
 
 export default function RekapPage() {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<MonthStats[]>([]);
 
   const { year, month } = getCurrentMonth();
   const [selectedYear, setSelectedYear] = useState(year);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/login');
-      } else {
-        fetchStats(user.id);
-      }
-    };
-    checkUser();
-  }, [router, supabase, selectedYear]);
-
-  const fetchStats = async (userId: string) => {
+  const fetchStats = useCallback(async (userId: string) => {
     setLoading(true);
     const monthlyStats: MonthStats[] = [];
 
@@ -82,7 +69,19 @@ export default function RekapPage() {
 
     setStats(monthlyStats);
     setLoading(false);
-  };
+  }, [selectedYear, supabase]);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/login');
+      } else {
+        fetchStats(user.id);
+      }
+    };
+    checkUser();
+  }, [fetchStats, router, supabase]);
 
   if (loading) {
     return (

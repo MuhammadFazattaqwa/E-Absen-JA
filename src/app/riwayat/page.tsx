@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Navbar from '@/components/ui/Navbar';
@@ -10,11 +10,10 @@ import EmptyState from '@/components/ui/EmptyState';
 import { Attendance, AttendanceStatus, Session } from '@/lib/types/database';
 import { formatDate, getCurrentMonth } from '@/lib/utils/date';
 import { exportToCSV } from '@/lib/utils/export';
-import Image from 'next/image';
 
 export default function RiwayatPage() {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [loading, setLoading] = useState(true);
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [filteredAttendances, setFilteredAttendances] = useState<Attendance[]>([]);
@@ -24,19 +23,7 @@ export default function RiwayatPage() {
   const [filterSession, setFilterSession] = useState<Session | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<AttendanceStatus | 'all'>('all');
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/login');
-      } else {
-        fetchAttendances(user.id);
-      }
-    };
-    checkUser();
-  }, [router, supabase]);
-
-  const fetchAttendances = async (userId: string) => {
+  const fetchAttendances = useCallback(async (userId: string) => {
     setLoading(true);
     const { data, error } = await supabase
       .from('attendances')
@@ -49,7 +36,19 @@ export default function RiwayatPage() {
       setFilteredAttendances(data);
     }
     setLoading(false);
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/login');
+      } else {
+        fetchAttendances(user.id);
+      }
+    };
+    checkUser();
+  }, [fetchAttendances, router, supabase]);
 
   useEffect(() => {
     let filtered = [...attendances];
