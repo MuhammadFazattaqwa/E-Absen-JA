@@ -2,9 +2,13 @@ import { Attendance } from '@/lib/types/database';
 import { formatDate } from './date';
 
 export function exportToCSV(attendances: Attendance[], filename: string = 'riwayat-absensi.csv') {
-  const headers = ['Tanggal', 'Sesi', 'Hari', 'Kajian', 'Pengajar', 'PJ', 'Status', 'Catatan', 'URL Foto'];
-  
-  const rows = attendances.map(a => [
+  const headers = ['No', 'Tanggal', 'Sesi', 'Hari', 'Kajian', 'Pengajar', 'PJ', 'Status', 'Catatan', 'Foto'];
+
+  const normalizeText = (value: string) =>
+    value.replace(/\s+/g, ' ').trim();
+
+  const rows = attendances.map((a, index) => [
+    index + 1,
     formatDate(a.date, 'dd/MM/yyyy'),
     a.session === 'morning' ? 'Pagi' : 'Malam',
     a.day_name,
@@ -12,13 +16,16 @@ export function exportToCSV(attendances: Attendance[], filename: string = 'riway
     a.teacher,
     a.pj,
     a.status,
-    a.note || '',
-    a.photo_url || '',
+    a.note ? normalizeText(a.note) : '-',
+    a.photo_url ? 'Ada' : 'Tidak',
   ]);
-  
+
+  const escapeCell = (value: string | number) =>
+    `"${String(value).replace(/"/g, '""')}"`;
+
   const csvContent = [
     headers.join(','),
-    ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
+    ...rows.map((row) => row.map(escapeCell).join(',')),
   ].join('\n');
   
   const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });

@@ -26,6 +26,7 @@ export default function AbsenPage() {
   const [note, setNote] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
+  const [photoCompressing, setPhotoCompressing] = useState(false);
   const whatsappNumber = session === 'morning' ? '6282229910627' : '6283847423953';
   const whatsappLink = `https://wa.me/${whatsappNumber}`;
 
@@ -54,15 +55,74 @@ export default function AbsenPage() {
     }
   }, [date, session]);
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const compressImage = async (file: File) => {
+    if (!file.type.startsWith('image/')) return file;
+
+    const maxSize = 1600;
+    const quality = 0.75;
+    const mimeType = 'image/jpeg';
+
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error('Gagal membaca gambar'));
+      image.src = URL.createObjectURL(file);
+    });
+
+    let targetWidth = img.width;
+    let targetHeight = img.height;
+    const ratio = Math.min(1, maxSize / targetWidth, maxSize / targetHeight);
+    targetWidth = Math.round(targetWidth * ratio);
+    targetHeight = Math.round(targetHeight * ratio);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      URL.revokeObjectURL(img.src);
+      return file;
+    }
+    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+    URL.revokeObjectURL(img.src);
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, mimeType, quality);
+    });
+
+    if (!blob) return file;
+
+    const newName = file.name.replace(/\.[^/.]+$/, '.jpg');
+    return new File([blob], newName, { type: mimeType, lastModified: Date.now() });
+  };
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) {
+      setPhoto(null);
+      setPhotoPreview('');
+      return;
+    }
+
+    try {
+      setPhotoCompressing(true);
+      const compressed = await compressImage(file);
+      setPhoto(compressed);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(compressed);
+    } catch {
       setPhoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+      toast.error('Gagal kompres foto, menggunakan file asli.');
+    } finally {
+      setPhotoCompressing(false);
     }
   };
 
@@ -76,11 +136,6 @@ export default function AbsenPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (status === 'Hadir' && !photo) {
-      toast.error('Foto bukti wajib untuk status Hadir');
-      return;
-    }
 
     setLoading(true);
 
@@ -276,15 +331,17 @@ export default function AbsenPage() {
 
           <div>
             <label className="block text-sm font-medium text-army-700 mb-1">
-              Foto Bukti Kehadiran {status === 'Hadir' && <span className="text-red-600">*</span>}
+              Foto Bukti Kehadiran (Opsional, otomatis dikompres)
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={handlePhotoChange}
               className="input-field"
-              required={status === 'Hadir'}
             />
+            {photoCompressing && (
+              <p className="text-sm text-army-600 mt-2">Mengompres foto...</p>
+            )}
             {photoPreview && (
               <div className="mt-4">
                 <p className="text-sm text-army-600 mb-2">Preview:</p>
