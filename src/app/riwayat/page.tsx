@@ -142,7 +142,7 @@ export default function RiwayatPage() {
                 disabled={filteredAttendances.length === 0}
                 className="btn-secondary w-full"
               >
-                📥 Export CSV
+                Export CSV
               </button>
             </div>
           </div>

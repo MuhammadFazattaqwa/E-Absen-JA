@@ -214,7 +214,7 @@ export default function AbsenPage() {
             onClick={handleQuickAttend}
             className="btn-secondary w-full"
           >
-            ⚡ Absen Hari Ini (Quick)
+            Absen Hari Ini (Quick)
           </button>
         </div>
 
