@@ -20,6 +20,16 @@
   .btn-outline {
     @apply border-2 border-army-600 text-army-600 hover:bg-army-50 font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
   }
+
+  .btn-animate {
+    @apply transition-transform duration-150 ease-out active:scale-[0.98];
+  }
+
+  .btn-animate.is-loading {
+    background-image: linear-gradient(110deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 45%, rgba(255,255,255,0) 70%);
+    background-size: 200% 100%;
+    animation: btn-shimmer 1.2s ease-in-out infinite;
+  }
   
   .input-field {
     @apply w-full px-4 py-2 border border-army-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-army-500 focus:border-transparent bg-white;
@@ -48,4 +58,9 @@
   .badge-alpa {
     @apply bg-red-100 text-red-800;
   }
+}
+
+@keyframes btn-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

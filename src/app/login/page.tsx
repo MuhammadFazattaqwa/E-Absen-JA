@@ -86,7 +86,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full"
+            className={`btn-primary btn-animate w-full ${loading ? 'is-loading' : ''}`}
           >
             {loading ? 'Loading...' : 'Login'}
           </button>
