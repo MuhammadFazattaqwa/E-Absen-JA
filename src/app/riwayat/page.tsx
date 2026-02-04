@@ -195,9 +195,9 @@ export default function RiwayatPage() {
                           href={attendance.photo_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-army-600 hover:text-army-800 underline"
+                          className="inline-flex items-center justify-center rounded-full bg-army-100 px-3 py-1 text-xs font-semibold text-army-800 transition-colors hover:bg-army-200"
                         >
-                          Lihat
+                          Lihat Foto
                         </a>
                       ) : (
                         <span className="text-army-400">-</span>
