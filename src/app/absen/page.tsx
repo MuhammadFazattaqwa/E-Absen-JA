@@ -28,7 +28,8 @@ export default function AbsenPage() {
   const [photoPreview, setPhotoPreview] = useState<string>('');
   const [photoCompressing, setPhotoCompressing] = useState(false);
   const whatsappNumber = session === 'morning' ? '6282229910627' : '6283847423953';
-  const whatsappLink = `https://wa.me/${whatsappNumber}`;
+  const whatsappMessage = 'Absen 8 Hadir';
+  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
   useEffect(() => {
     const checkUser = async () => {
