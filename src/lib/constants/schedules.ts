@@ -11,7 +11,6 @@ export interface Schedule {
 }
 
 export const SCHEDULES: Schedule[] = [
-  { day: 'Ahad', session: 'morning', subject: "Rasa'il Al-Junaid", teacher: 'aba Djoko', pj: 'Silvia', time: '05.00' },
   { day: 'Senin', session: 'morning', subject: 'Psikologi Agama', teacher: 'ustadzah Niha', pj: 'Alvia', time: '05.00' },
   { day: 'Selasa', session: 'morning', subject: "Fathul Mu'in", teacher: 'aba Yahya', pj: 'Silvia', time: '05.00' },
   { day: 'Rabu', session: 'morning', subject: 'Filsafat Ilmu', teacher: 'ustadz Husni', pj: 'Mela', time: '05.00' },

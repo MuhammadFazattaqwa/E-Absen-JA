@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Navbar from '@/components/ui/Navbar';
@@ -27,6 +27,7 @@ export default function AbsenPage() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
   const [photoCompressing, setPhotoCompressing] = useState(false);
+  const whatsappCameraInputRef = useRef<HTMLInputElement>(null);
   const whatsappNumber = session === 'morning' ? '6282229910627' : '6283847423953';
   const whatsappMessage = 'Absen 8 Hadir';
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
@@ -97,6 +98,31 @@ export default function AbsenPage() {
     return new File([blob], newName, { type: mimeType, lastModified: Date.now() });
   };
 
+  const setPhotoPreviewFromFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const setPhotoFromFile = async (file: File) => {
+    try {
+      setPhotoCompressing(true);
+      const compressed = await compressImage(file);
+      setPhoto(compressed);
+      setPhotoPreviewFromFile(compressed);
+      return compressed;
+    } catch {
+      setPhoto(file);
+      setPhotoPreviewFromFile(file);
+      toast.error('Gagal kompres foto, menggunakan file asli.');
+      return file;
+    } finally {
+      setPhotoCompressing(false);
+    }
+  };
+
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
@@ -105,26 +131,31 @@ export default function AbsenPage() {
       return;
     }
 
-    try {
-      setPhotoCompressing(true);
-      const compressed = await compressImage(file);
-      setPhoto(compressed);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(compressed);
-    } catch {
-      setPhoto(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      toast.error('Gagal kompres foto, menggunakan file asli.');
-    } finally {
-      setPhotoCompressing(false);
+    await setPhotoFromFile(file);
+  };
+
+  const handleWhatsappConfirmClick = () => {
+    const input = whatsappCameraInputRef.current;
+    if (!input) {
+      window.open(whatsappLink, '_blank', 'noopener,noreferrer');
+      return;
     }
+
+    input.value = '';
+    input.click();
+  };
+
+  const handleWhatsappCameraChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    await setPhotoFromFile(file);
+
+    const opened = window.open(whatsappLink, '_blank', 'noopener,noreferrer');
+    if (!opened) {
+      window.location.href = whatsappLink;
+    }
+    toast.success('Foto siap. Di WhatsApp, lampirkan foto yang baru diambil lalu kirim.');
   };
 
   const handleQuickAttend = () => {
@@ -364,14 +395,22 @@ export default function AbsenPage() {
           >
             {loading ? 'Menyimpan...' : 'Simpan Absensi'}
           </button>
-          <a
-            href={whatsappLink}
-            target="_blank"
-            rel="noopener noreferrer"
+          <input
+            ref={whatsappCameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleWhatsappCameraChange}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={handleWhatsappConfirmClick}
+            disabled={photoCompressing}
             className="btn-outline w-full block text-center"
           >
             Konfirmasi via WhatsApp
-          </a>
+          </button>
           <p className="text-center text-sm text-army-600">
             Nomor otomatis sesuai sesi: {session === 'morning' ? 'Pagi' : 'Malam'}
           </p>
