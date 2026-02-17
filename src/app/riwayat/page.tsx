@@ -9,7 +9,7 @@ import Loading from '@/components/ui/Loading';
 import EmptyState from '@/components/ui/EmptyState';
 import { Attendance, AttendanceStatus, Session } from '@/lib/types/database';
 import { formatDate, getCurrentMonth } from '@/lib/utils/date';
-import { exportToCSV } from '@/lib/utils/export';
+import { exportToExcel } from '@/lib/utils/export';
 
 export default function RiwayatPage() {
   const router = useRouter();
@@ -68,8 +68,8 @@ export default function RiwayatPage() {
     setFilteredAttendances(filtered);
   }, [filterMonth, filterSession, filterStatus, attendances]);
 
-  const handleExport = () => {
-    exportToCSV(filteredAttendances, `riwayat-absensi-${filterMonth}.csv`);
+  const handleExport = async () => {
+    await exportToExcel(filteredAttendances, `riwayat-absensi-${filterMonth}.xlsx`);
   };
 
   if (loading) {
@@ -142,7 +142,7 @@ export default function RiwayatPage() {
                 disabled={filteredAttendances.length === 0}
                 className="btn-secondary w-full"
               >
-                Export CSV
+                Export Excel
               </button>
             </div>
           </div>
