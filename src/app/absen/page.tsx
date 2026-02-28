@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Navbar from '@/components/ui/Navbar';
-import { getDayNameFromDate, getSchedule, DayName, Session } from '@/lib/constants/schedules';
+import { getDayNameFromDate, getSchedule, DayName, Session, SCHEDULES } from '@/lib/constants/schedules';
 import { formatDateForInput } from '@/lib/utils/date';
 import { AttendanceStatus } from '@/lib/types/database';
 import toast from 'react-hot-toast';
@@ -18,10 +18,11 @@ export default function AbsenPage() {
 
   const [date, setDate] = useState(formatDateForInput(new Date()));
   const [session, setSession] = useState<Session>('morning');
-  const [dayName, setDayName] = useState<DayName>('Ahad');
+  const [dayName, setDayName] = useState<DayName>(getDayNameFromDate(new Date()));
   const [subject, setSubject] = useState('');
   const [teacher, setTeacher] = useState('');
   const [pj, setPj] = useState('');
+  const [selectedScheduleKey, setSelectedScheduleKey] = useState('');
   const [status, setStatus] = useState<AttendanceStatus>('Hadir');
   const [note, setNote] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
@@ -30,6 +31,32 @@ export default function AbsenPage() {
   const whatsappNumber = session === 'morning' ? '6282229910627' : '6283847423953';
   const whatsappMessage = 'assalamualaikum, absen 8 hadir';
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+  const defaultSchedule = getSchedule(dayName, session);
+  const subjectOptions = SCHEDULES;
+
+  const getScheduleKey = (schedule: (typeof SCHEDULES)[number]) =>
+    `${schedule.day}__${schedule.session}__${schedule.subject}`;
+
+  const applyScheduleDefaults = (selectedDate: string, selectedSession: Session) => {
+    const selectedDateValue = new Date(selectedDate);
+    const day = getDayNameFromDate(selectedDateValue);
+    const schedule = getSchedule(day, selectedSession);
+
+    setDayName(day);
+    setSelectedScheduleKey(schedule ? getScheduleKey(schedule) : '');
+    setSubject(schedule?.subject ?? '');
+    setTeacher(schedule?.teacher ?? '');
+    setPj(schedule?.pj ?? '');
+  };
+
+  const handleSubjectChange = (scheduleKey: string) => {
+    const selectedSchedule = subjectOptions.find((schedule) => getScheduleKey(schedule) === scheduleKey);
+
+    setSelectedScheduleKey(scheduleKey);
+    setSubject(selectedSchedule?.subject ?? '');
+    setTeacher(selectedSchedule?.teacher ?? '');
+    setPj(selectedSchedule?.pj ?? '');
+  };
 
   useEffect(() => {
     const checkUser = async () => {
@@ -44,16 +71,15 @@ export default function AbsenPage() {
   }, [router, supabase]);
 
   useEffect(() => {
-    const selectedDate = new Date(date);
-    const day = getDayNameFromDate(selectedDate);
-    setDayName(day);
-
+    const selectedDateValue = new Date(date);
+    const day = getDayNameFromDate(selectedDateValue);
     const schedule = getSchedule(day, session);
-    if (schedule) {
-      setSubject(schedule.subject);
-      setTeacher(schedule.teacher);
-      setPj(schedule.pj);
-    }
+
+    setDayName(day);
+    setSelectedScheduleKey(schedule ? getScheduleKey(schedule) : '');
+    setSubject(schedule?.subject ?? '');
+    setTeacher(schedule?.teacher ?? '');
+    setPj(schedule?.pj ?? '');
   }, [date, session]);
 
   const compressImage = async (file: File) => {
@@ -128,11 +154,15 @@ export default function AbsenPage() {
   };
 
   const handleQuickAttend = () => {
-    setDate(formatDateForInput(new Date()));
     const now = new Date();
+    const currentDate = formatDateForInput(now);
     const hour = now.getHours();
-    setSession(hour < 12 ? 'morning' : 'evening');
+    const currentSession = hour < 12 ? 'morning' : 'evening';
+
+    setDate(currentDate);
+    setSession(currentSession);
     setStatus('Hadir');
+    applyScheduleDefaults(currentDate, currentSession);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -266,12 +296,21 @@ export default function AbsenPage() {
             <label className="block text-sm font-medium text-army-700 mb-1">
               Kajian
             </label>
-            <input
-              type="text"
-              value={subject}
-              className="input-field bg-gray-100"
-              readOnly
-            />
+            <select
+              value={selectedScheduleKey}
+              onChange={(e) => handleSubjectChange(e.target.value)}
+              className="input-field"
+              required
+            >
+              <option value="" disabled>
+                Pilih mata kajian
+              </option>
+              {subjectOptions.map((schedule) => (
+                <option key={getScheduleKey(schedule)} value={getScheduleKey(schedule)}>
+                  {schedule.subject} ({schedule.day} - {schedule.session === 'morning' ? 'Pagi' : 'Malam'})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -298,6 +337,23 @@ export default function AbsenPage() {
                 readOnly
               />
             </div>
+          </div>
+
+          <div className="rounded-lg border border-army-200 bg-krem-100 px-4 py-3 text-sm text-army-700">
+            <p>
+              {defaultSchedule
+                ? 'Mata kajian terisi otomatis dari jadwal. Jika ada pertukaran, Anda bisa memilih mata kajian apa pun dari daftar dan pengajar serta PJ akan menyesuaikan otomatis.'
+                : 'Tidak ada jadwal default untuk hari dan sesi ini. Pilih mata kajian dari daftar, lalu pengajar dan PJ akan menyesuaikan otomatis.'}
+            </p>
+            {defaultSchedule && (
+              <button
+                type="button"
+                onClick={() => applyScheduleDefaults(date, session)}
+                className="mt-2 font-medium text-army-800 underline underline-offset-2"
+              >
+                Kembalikan ke jadwal default
+              </button>
+            )}
           </div>
 
           <div>
