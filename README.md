@@ -195,7 +195,7 @@ Jadwal kajian disimpan sebagai konstanta di `src/lib/constants/schedules.ts`:
 ### Kajian Pagi (05.00)
 - **Ahad**: Rasa'il Al-Junaid (aba Djoko) - PJ: Silvia
 - **Senin**: Psikologi Agama (ustadzah Niha) - PJ: Alvia
-- **Selasa**: Fathul Mu'in (aba Yahya) - PJ: Silvia
+- **Selasa**: Riyadhus Sholihin (aba Yahya) - PJ: Yusrin
 - **Rabu**: Filsafat Ilmu (ustadz Husni) - PJ: Mela
 - **Kamis**: Manajemen SDM (ustadzah Abil & ustadzah Indah) - PJ: Sofia
 - **Jumat**: Ilmu Kalam (ustadz Mahbub) - PJ: Salisa
@@ -204,7 +204,7 @@ Jadwal kajian disimpan sebagai konstanta di `src/lib/constants/schedules.ts`:
 ### Kajian Malam (20.00)
 - **Ahad**: Ihya' Ulumuddin (aba Djoko) - PJ: Yusrin
 - **Senin**: Filsafat Pendidikan Islam (ustadzah Ani) - PJ: Hibatin
-- **Selasa**: Riyadhus Sholihin (aba Yahya) - PJ: Yusrin
+- **Selasa**: Fathul Mu'in (aba Yahya) - PJ: Silvia
 - **Rabu**: Sejarah Peradaban Islam (ustadz Ulil & ustadzah Mida) - PJ: Amina
 - **Kamis**: Tafsir Jallalain & Istighotsah (aba Djoko) - PJ: Yusrin
 - **Jumat**: Qurrotul 'Uyun (ustadz Huda & ustadzah Idhoh) - PJ: Nisrina
